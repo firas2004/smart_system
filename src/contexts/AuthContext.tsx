@@ -24,21 +24,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const isMockAdmin = localStorage.getItem('mockAdmin') === 'true';
-    if (isMockAdmin) {
-      setUser({ id: 'mock-admin-id', email: 'admin@admin.com' } as User);
-      setSession({ user: { id: 'mock-admin-id', email: 'admin@admin.com' } } as Session);
-      setLoading(false);
-      return;
-    }
-
-    const isMockClient = localStorage.getItem('mockClient') === 'true';
-    if (isMockClient) {
-      setUser({ id: 'mock-client-id', email: 'client@client.com' } as User);
-      setSession({ user: { id: 'mock-client-id', email: 'client@client.com' } } as Session);
-      setLoading(false);
-      return;
-    }
+    // Clear any legacy mock state
+    localStorage.removeItem('mockAdmin');
+    localStorage.removeItem('mockClient');
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
@@ -56,12 +44,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signOut = async () => {
-    if (localStorage.getItem('mockAdmin') === 'true' || localStorage.getItem('mockClient') === 'true') {
-      localStorage.removeItem('mockAdmin');
-      localStorage.removeItem('mockClient');
-      window.location.href = '/login';
-      return;
-    }
     await supabase.auth.signOut();
   };
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Zap, DollarSign, TrendingUp, Plug, Plus } from 'lucide-react';
+import { Zap, DollarSign, TrendingUp, Plug, Plus, Building2, Sparkles } from 'lucide-react';
 import StatCard from '@/components/dashboard/StatCard';
 import PowerChart from '@/components/dashboard/PowerChart';
 import DeviceDonut from '@/components/dashboard/DeviceDonut';
@@ -30,85 +30,109 @@ const ClientDashboard = () => {
 
   if (!buildingId) {
     return (
-      <div className="p-6 lg:p-8 flex flex-col items-center justify-center min-h-[80vh] text-center">
-        <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center mb-4">
-          <Building2 className="w-8 h-8 text-muted-foreground" />
+      <div className="p-6 lg:p-8 flex flex-col items-center justify-center min-h-[80vh] text-center space-y-6">
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 border border-cyan-500/50 flex items-center justify-center">
+          <Building2 className="w-10 h-10 text-cyan-400" />
         </div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">Bienvenue sur Smart Energy</h1>
-        <p className="text-muted-foreground max-w-md">
-          Votre compte n'est pas encore associé à un bâtiment. Veuillez contacter votre administrateur pour qu'il vous assigne à votre résidence ou espace commercial.
-        </p>
+        <div className="space-y-2 max-w-2xl">
+          <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Bienvenue</h1>
+          <p className="text-cyan-300/70 leading-relaxed text-lg">
+            Votre compte n'est pas encore associé à un bâtiment. Veuillez contacter votre administrateur pour qu'il vous assigne à votre résidence ou espace commercial.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Mon Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-energy-green animate-pulse-glow" />
-            {building?.name || 'Mon bâtiment'}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button onClick={() => setShowAddDevice(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl energy-gradient text-primary-foreground text-sm font-medium hover:opacity-90">
-            <Plus className="w-4 h-4" /> Ajouter Appareil
-          </button>
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">Puissance totale</p>
-            <p className="text-3xl font-bold font-mono text-primary">{totalPower} W</p>
+    <div className="p-6 lg:p-8 space-y-8">
+      {/* Header Section */}
+      <div className="relative">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
+              <p className="text-xs font-black text-cyan-400 uppercase tracking-widest">Système Actif</p>
+            </div>
+            <h1 className="text-4xl lg:text-5xl font-black neon-text">Mon Dashboard</h1>
+            <p className="text-cyan-300/70 text-lg flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-400" />
+              {building?.name || 'Mon bâtiment'}
+            </p>
+          </div>
+          <div className="flex flex-col items-end space-y-3">
+            <button onClick={() => setShowAddDevice(true)}
+              className="btn-neon-primary flex items-center gap-2">
+              <Plus className="w-5 h-5" /> Ajouter Appareil
+            </button>
+            <div className="text-right p-4 rounded-lg border border-cyan-500/30 bg-cyan-500/10">
+              <p className="text-xs text-cyan-400/70 font-bold uppercase tracking-wider">Puissance Totale</p>
+              <p className="text-4xl font-black text-cyan-300 mt-1 font-mono">{totalPower}<span className="text-lg">W</span></p>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Alerts Section */}
       {alerts.length > 0 && (
-        <div className="space-y-2">
-          {alerts.slice(0, 2).map(a => (
-            <AlertBanner key={a.id} alert={{ id: a.id, type: a.type as any, severity: a.severity as any, message: a.message, status: (a.status || 'active') as any, createdAt: a.created_at }} />
-          ))}
+        <div className="space-y-3 animate-slide-up">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-red-400" />
+            <p className="text-xs font-bold text-red-400 uppercase tracking-wider">Alertes Actives</p>
+          </div>
+          <div className="space-y-2">
+            {alerts.slice(0, 3).map(a => (
+              <AlertBanner key={a.id} alert={{ id: a.id, type: a.type as any, severity: a.severity as any, message: a.message, status: (a.status || 'active') as any, createdAt: a.created_at }} />
+            ))}
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Consommation Aujourd'hui" value={`${totalConsumption.toFixed(1)} kWh`} icon={Zap} glowClass="stat-glow-green" />
         <StatCard title="Coût Estimé" value={`${(totalConsumption * electricityRate).toFixed(2)} TND`} icon={DollarSign} glowClass="stat-glow-amber" />
         <StatCard title="Puissance Actuelle" value={`${totalPower} W`} icon={TrendingUp} glowClass="stat-glow-red" />
         <StatCard title="Mes Appareils" value={`${activeDevices.length} / ${devices.length}`} icon={Plug} glowClass="stat-glow-blue" />
       </div>
 
+      {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2"><PowerChart /></div>
         <DeviceDonut />
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-foreground">Mes Appareils</h2>
+      {/* Devices Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-black text-cyan-300">Mes Appareils</h2>
+          <span className="text-xs bg-cyan-500/20 px-3 py-1 rounded-full text-cyan-400 font-bold">{devices.length} appareils</span>
         </div>
         {devices.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {devices.map(d => (
-              <DeviceCard key={d.id} device={{
-                id: d.id, buildingId: d.building_id, name: d.name, type: d.type as any,
-                status: (d.status || 'offline') as any, isOn: d.is_on ?? false,
-                currentPower: Number(d.current_power) || 0, todayConsumption: Number(d.today_consumption) || 0,
-                lastSeen: d.last_seen || '', location: d.location || '',
-              }} />
+            {devices.map((d, idx) => (
+              <div key={d.id} className="animate-slide-up" style={{ animationDelay: `${idx * 50}ms` }}>
+                <DeviceCard device={{
+                  id: d.id, buildingId: d.building_id, name: d.name, type: d.type as any,
+                  status: (d.status || 'offline') as any, isOn: d.is_on ?? false,
+                  currentPower: Number(d.current_power) || 0, todayConsumption: Number(d.today_consumption) || 0,
+                  lastSeen: d.last_seen || '', location: d.location || '',
+                }} />
+              </div>
             ))}
           </div>
         ) : (
-          <div className="glass-card p-8 text-center">
-            <Plug className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-30" />
-            <p className="text-muted-foreground">Aucun appareil. Ajoutez votre premier appareil !</p>
+          <div className="glass-card p-8 text-center space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-xl bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
+              <Plug className="w-8 h-8 text-cyan-400" />
+            </div>
+            <p className="text-cyan-300/70 font-medium">Aucun appareil. Ajoutez votre premier appareil !</p>
           </div>
         )}
       </div>
 
       {/* Task List */}
-      <div className="mt-6">
+      <div className="mt-8">
         <TaskList />
       </div>
 

@@ -41,82 +41,120 @@ const DevicesPage = () => {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <Link to="/dashboard" className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
-          <ArrowLeft className="w-5 h-5 text-foreground" />
-        </Link>
-        <div className="flex-1 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{isAdmin ? 'Tous les Appareils' : 'Mes Appareils'}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{devices.length} appareils — {devices.filter(d => d.status === 'online').length} en ligne</p>
+    <div className="p-6 lg:p-8 space-y-8">
+      {/* Header Section */}
+      <div className="relative flex items-start justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <Link to="/dashboard"
+            className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 flex items-center justify-center hover:border-cyan-500/60 transition-all hover:shadow-cyan-500/30 hover:shadow-lg group">
+            <ArrowLeft className="w-6 h-6 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
+          </Link>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
+              <p className="text-xs font-black text-cyan-400 uppercase tracking-widest">Gestion Appareils</p>
+            </div>
+            <h1 className="text-4xl lg:text-5xl font-black neon-text">{isAdmin ? 'Tous les Appareils' : 'Mes Appareils'}</h1>
+            <p className="text-cyan-300/70 text-lg">
+              <span className="inline-block bg-cyan-500/20 px-3 py-1 rounded-lg border border-cyan-500/30 font-mono">
+                {devices.length} appareils — {devices.filter(d => d.status === 'online').length} en ligne
+              </span>
+            </p>
           </div>
-          {buildingId && (
-            <button onClick={() => setShowAddDevice(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl energy-gradient text-primary-foreground text-sm font-medium hover:opacity-90">
-              <Plus className="w-4 h-4" /> Ajouter
-            </button>
-          )}
         </div>
+        {buildingId && (
+          <button onClick={() => setShowAddDevice(true)}
+            className="btn-neon-primary flex items-center gap-2 h-fit">
+            <Plus className="w-5 h-5" /> Ajouter Appareil
+          </button>
+        )}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input type="text" placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+      {/* Search & Filter Section */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-400/50" />
+            <input type="text" placeholder="Rechercher un appareil..." value={search} onChange={e => setSearch(e.target.value)}
+              className="input-glow w-full pl-12 pr-4 py-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-sm text-cyan-200 placeholder:text-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-400" />
+          </div>
         </div>
         <div className="flex gap-2 flex-wrap">
           {['all', 'air_conditioner', 'water_heater', 'refrigerator', 'lighting'].map(t => (
             <button key={t} onClick={() => setFilter(t)}
-              className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${filter === t ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-secondary text-muted-foreground border border-border'}`}>
+              className={`px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                filter === t
+                  ? 'bg-gradient-to-r from-cyan-500/30 to-purple-500/30 border border-cyan-500/60 text-cyan-200 shadow-cyan-500/20 shadow-lg'
+                  : 'bg-cyan-500/10 border border-cyan-500/20 text-cyan-400/70 hover:border-cyan-500/40'
+              }`}>
               {t === 'all' ? 'Tous' : typeLabels[t]}
             </button>
           ))}
         </div>
       </div>
 
+      {/* Devices Table */}
       {filtered.length > 0 ? (
-        <div className="glass-card overflow-hidden">
+        <div className="table-neon overflow-hidden rounded-xl">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border/50">
+                <tr className="border-b border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 to-purple-500/10">
                   {['Appareil', 'Type', 'Statut', 'Puissance', "Aujourd'hui", 'Contrôle'].map(h => (
-                    <th key={h} className={`text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-5 py-3 ${h === 'Contrôle' ? 'text-center' : ''}`}>{h}</th>
+                    <th key={h} className={`text-left text-xs font-black text-cyan-400 uppercase tracking-widest px-6 py-4 ${h === 'Contrôle' ? 'text-center' : ''}`}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(device => {
+                {filtered.map((device, idx) => {
                   const Icon = iconMap[device.type] || Plug;
                   return (
-                    <tr key={device.id} className="border-b border-border/30 hover:bg-secondary/30 transition-colors">
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${device.is_on ? 'bg-primary/15' : 'bg-secondary'}`}>
-                            <Icon className={`w-4 h-4 ${device.is_on ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <tr key={device.id} className="border-b border-cyan-500/20 hover:bg-cyan-500/5 transition-colors group animate-slide-up" style={{ animationDelay: `${idx * 30}ms` }}>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center border transition-all ${
+                            device.is_on
+                              ? 'bg-gradient-to-br from-cyan-500/40 to-purple-500/40 border-cyan-500/60 text-cyan-300'
+                              : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400/50'
+                          }`}>
+                            <Icon className="w-5 h-5" />
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{device.name}</p>
-                            <p className="text-xs text-muted-foreground">{device.location}</p>
+                          <div className="space-y-1">
+                            <p className="text-sm font-black text-cyan-200 group-hover:text-cyan-100">{device.name}</p>
+                            <p className="text-xs text-cyan-400/50 font-mono">{device.location || '—'}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-xs text-muted-foreground">{typeLabels[device.type] || device.type}</td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-1.5">
-                          <span className={`w-2 h-2 rounded-full ${device.status === 'online' ? 'bg-energy-green' : 'bg-muted-foreground'}`} />
-                          <span className="text-xs text-muted-foreground capitalize">{device.status}</span>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-purple-500/20 border border-purple-500/30 text-xs font-bold text-purple-300 uppercase tracking-wider">
+                          {typeLabels[device.type] || device.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2.5 h-2.5 rounded-full ${device.status === 'online' ? 'bg-green-400 animate-pulse' : 'bg-cyan-400/30'}`} />
+                          <span className={`text-xs font-black uppercase tracking-wider ${device.status === 'online' ? 'text-green-400' : 'text-cyan-400/60'}`}>
+                            {device.status === 'online' ? 'En Ligne' : 'Hors Ligne'}
+                          </span>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-sm font-mono text-foreground">{device.is_on ? `${device.current_power} W` : '—'}</td>
-                      <td className="px-5 py-4 text-sm font-mono text-foreground">{device.today_consumption} kWh</td>
-                      <td className="px-5 py-4 text-center">
+                      <td className="px-6 py-4">
+                        <span className={`text-sm font-black font-mono ${device.is_on ? 'text-cyan-300' : 'text-cyan-400/50'}`}>
+                          {device.is_on ? `${device.current_power} W` : '—'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-black font-mono text-purple-300">{device.today_consumption} kWh</span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
                         <button onClick={() => handleToggle(device.id, device.is_on ?? false)}
                           disabled={device.status === 'offline'}
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center mx-auto transition-colors ${device.is_on ? 'bg-primary/20 text-primary' : 'bg-secondary text-muted-foreground'} disabled:opacity-40`}>
-                          <Power className="w-4 h-4" />
+                          className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto transition-all border font-black ${
+                            device.is_on
+                              ? 'bg-gradient-to-br from-cyan-500/40 to-purple-500/40 border-cyan-500/60 text-cyan-300 hover:shadow-cyan-500/30 hover:shadow-lg'
+                              : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400/50 hover:border-cyan-500/40'
+                          } disabled:opacity-40 disabled:cursor-not-allowed`}>
+                          <Power className="w-5 h-5" />
                         </button>
                       </td>
                     </tr>
@@ -127,9 +165,13 @@ const DevicesPage = () => {
           </div>
         </div>
       ) : (
-        <div className="glass-card p-8 text-center">
-          <Plug className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-30" />
-          <p className="text-muted-foreground">Aucun appareil trouvé.</p>
+        <div className="glass-card p-12 text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-xl bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
+            <Plug className="w-8 h-8 text-cyan-400" />
+          </div>
+          <p className="text-cyan-300/70 font-medium text-lg">
+            {search || filter !== 'all' ? 'Aucun appareil ne correspond à votre recherche.' : 'Aucun appareil trouvé.'}
+          </p>
         </div>
       )}
 

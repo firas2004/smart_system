@@ -17,7 +17,7 @@ import SettingsPage from "./pages/Settings";
 import Login from "./pages/Login";
 import SelectBuilding from "./pages/SelectBuilding";
 import NotFound from "./pages/NotFound";
-import Landing from "./pages/Landing";
+import WelcomePage from "./pages/WelcomePage";
 import ThemeSwitcher from "./components/ThemeSwitcher";
 
 const queryClient = new QueryClient();
@@ -70,7 +70,7 @@ const App = () => (
         <ThemeSwitcher />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Landing />} />
+            <Route path="/" element={<WelcomePage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/select-building" element={
               <ProtectedRoute><SelectBuilding /></ProtectedRoute>

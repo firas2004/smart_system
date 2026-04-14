@@ -27,28 +27,51 @@ const AddDeviceForm = ({ onClose, buildingId }: AddDeviceFormProps) => {
     e.preventDefault();
     setSaving(true);
 
-    const { error } = await supabase.from('devices').insert({
-      building_id: buildingId,
-      name: device.name,
-      type: device.type,
-      brand: device.brand || null,
-      model: device.model || null,
-      location: device.location || null,
-      nominal_power: device.nominal_power || null,
-      status: 'offline',
-      is_on: false,
-      current_power: 0,
-      today_consumption: 0,
-    });
-
-    if (error) {
-      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Appareil ajouté !' });
-      queryClient.invalidateQueries({ queryKey: ['devices'] });
-      onClose();
+    if (!buildingId) {
+      toast({ title: 'Erreur', description: 'Aucun bâtiment sélectionné.', variant: 'destructive' });
+      setSaving(false);
+      return;
     }
-    setSaving(false);
+
+    try {
+      const payload = {
+        building_id: buildingId,
+        name: device.name.trim(),
+        type: device.type,
+        brand: device.brand.trim() || null,
+        model: device.model.trim() || null,
+        location: device.location.trim() || null,
+        nominal_power: device.nominal_power > 0 ? device.nominal_power : null,
+        status: 'offline',
+        is_on: false,
+        current_power: 0,
+        today_consumption: 0,
+      };
+
+      const { error } = await supabase.from('devices').insert(payload);
+
+      if (error) {
+        console.error('Device insert error:', error);
+        toast({
+          title: 'Erreur',
+          description: error.message || 'Impossible d’ajouter l’appareil. Vérifiez vos permissions.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({ title: 'Appareil ajouté !' });
+        queryClient.invalidateQueries({ queryKey: ['devices', buildingId] });
+        onClose();
+      }
+    } catch (err: any) {
+      console.error('Unexpected device insert error:', err);
+      toast({
+        title: 'Erreur inattendue',
+        description: err?.message || 'Une erreur est survenue lors de l’ajout de l’appareil.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
